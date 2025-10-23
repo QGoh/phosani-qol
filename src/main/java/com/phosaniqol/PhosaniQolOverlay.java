@@ -102,17 +102,20 @@ public class PhosaniQolOverlay extends Overlay
 			return;
 		}
 
-		LocalPoint localPoint = null;
-		int size = 0;
+		LocalPoint localPoint;
+		int size = 3;
 		if (phosaniNpc instanceof PhosaniObject)
 		{
-			localPoint = ((PhosaniObject) phosaniNpc).getTileObject().getLocalLocation();
-			size = 3;
+			localPoint = ((PhosaniObject) phosaniNpc).getGameObject().getLocalLocation();
 		}
-		else
+		else if (npc != null)
 		{
 			localPoint = npc.getLocalLocation();
 			size = npc.getComposition().getSize();
+		}
+		else
+		{
+			return;
 		}
 
 		PhosaniQolConfig.HighlightStyle highlightStyle = phosaniNpc.getHighlightStyle();
@@ -127,16 +130,37 @@ public class PhosaniQolOverlay extends Overlay
 		}
 		else if (highlightStyle == PhosaniQolConfig.HighlightStyle.HULL)
 		{
-			shape = npc.getConvexHull();
+			if (phosaniNpc instanceof PhosaniObject)
+			{
+				shape = ((PhosaniObject) phosaniNpc).getGameObject().getConvexHull();
+			}
+			else
+			{
+				shape = npc.getConvexHull();
+			}
 		}
 		else if (highlightStyle == PhosaniQolConfig.HighlightStyle.CLICKBOX)
 		{
-			shape = Perspective.getClickbox(client, client.getTopLevelWorldView(), npc.getModel(), npc.getCurrentOrientation(), localPoint.getX(), localPoint.getY(),
-				Perspective.getTileHeight(client, localPoint, npc.getWorldLocation().getPlane()));
+			if (phosaniNpc instanceof PhosaniObject)
+			{
+				shape = ((PhosaniObject) phosaniNpc).getGameObject().getClickbox();
+			}
+			else
+			{
+				shape = Perspective.getClickbox(client, client.getTopLevelWorldView(), npc.getModel(), npc.getCurrentOrientation(), localPoint.getX(), localPoint.getY(),
+					Perspective.getTileHeight(client, localPoint, npc.getWorldLocation().getPlane()));
+			}
 		}
 		else if (highlightStyle == PhosaniQolConfig.HighlightStyle.OUTLINE)
 		{
-			renderer.drawOutline(npc, (int) width, borderColor, 5);
+			if (phosaniNpc instanceof PhosaniObject)
+			{
+				renderer.drawOutline(((PhosaniObject) phosaniNpc).getGameObject(), (int) width, borderColor, 5);
+			}
+			else
+			{
+				renderer.drawOutline(npc, (int) width, borderColor, 5);
+			}
 		}
 
 		if (shape != null)

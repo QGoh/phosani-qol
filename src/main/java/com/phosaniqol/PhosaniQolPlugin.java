@@ -24,10 +24,8 @@ import net.runelite.api.Player;
 import net.runelite.api.Scene;
 import net.runelite.api.Skill;
 import net.runelite.api.Tile;
-import net.runelite.api.TileObject;
 import net.runelite.api.WorldView;
 import net.runelite.api.coords.LocalPoint;
-import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.FakeXpDrop;
 import net.runelite.api.events.GameObjectDespawned;
 import net.runelite.api.events.GameObjectSpawned;
@@ -97,6 +95,7 @@ public class PhosaniQolPlugin extends Plugin
 		NpcID.NIGHTMARE_CHALLENGE_SLEEPWALKER
 	);
 
+	private final int HPBAR_HUD = 6099;
 	private final int PRE_PHOSANI_SPORE = 37738;
 	private final int PHOSANI_SPORE = 37739;
 
@@ -153,7 +152,7 @@ public class PhosaniQolPlugin extends Plugin
 				case "totemChargeOverlayFont":
 				case "totemChargeOverlayOffset":
 				case "totemChargeOverlayColor":
-					totems.forEach((k, v) -> v.setHighlightConfig(config));
+					totems.forEach((npcId, totem) -> totem.setHighlightConfig(config));
 					break;
 				case "phosaniPhaseColors":
 				case "phosaniBorderWidth":
@@ -175,7 +174,7 @@ public class PhosaniQolPlugin extends Plugin
 				case "addsBorderWidth":
 				case "addsBorderColor":
 				case "addsFillColor":
-					adds.forEach((k, v) -> v.setHighlightConfig(config));
+					adds.forEach((npcId, add) -> add.setHighlightConfig(config));
 					break;
 				case "hideHealthOverlay":
 					Widget healthBar = client.getWidget(InterfaceID.HpbarHud.HP);
@@ -183,6 +182,8 @@ public class PhosaniQolPlugin extends Plugin
 					{
 						healthBar.setHidden(config.hideHealthOverlay());
 					}
+				case "highlightSpores":
+					spores.forEach((spore) -> spore.setHighlightConfig(config));
 			}
 		}
 	}
@@ -285,9 +286,13 @@ public class PhosaniQolPlugin extends Plugin
 	@Subscribe
 	public void onVarbitChanged(VarbitChanged event)
 	{
+		if (event.getVarbitId() != HPBAR_HUD)
+		{
+			return;
+		}
 		if (client.getVarbitValue(VarbitID.PLAYER_IS_IN_NIGHTMARE_CHALLENGE) == 1 && phosani != null && phosani.getShield() > 0)
 		{
-			int shield = client.getVarbitValue(6099);
+			int shield = client.getVarbitValue(HPBAR_HUD);
 			phosani.setShield(shield);
 		}
 	}
@@ -386,12 +391,12 @@ public class PhosaniQolPlugin extends Plugin
 		GameObject object = event.getGameObject();
 		if (object.getId() == PHOSANI_SPORE || object.getId() == PRE_PHOSANI_SPORE)
 		{
-			spores.removeIf(spore -> spore.getTileObject() == object);
+			spores.removeIf(spore -> spore.getGameObject() == object);
 		}
 	}
 
 	// copied from objectindicators
-	private TileObject findTileObject(WorldView wv, int x, int y, int id)
+	private GameObject findGameObject(WorldView wv, int x, int y, int id)
 	{
 		int level = wv.getPlane();
 		Scene scene = wv.getScene();
@@ -416,7 +421,7 @@ public class PhosaniQolPlugin extends Plugin
 	}
 
 	// copied from objectindicators
-	private void markObject(TileObject object)
+	private void markObject(GameObject object)
 	{
 		WorldView wv = client.getLocalPlayer().getWorldView();
 		if (wv == null)
@@ -425,7 +430,7 @@ public class PhosaniQolPlugin extends Plugin
 		}
 
 		LocalPoint localPoint = object.getLocalLocation();
-		TileObject tileObject = findTileObject(wv, localPoint.getSceneX(), localPoint.getSceneY(), object.getId());
+		GameObject tileObject = findGameObject(wv, localPoint.getSceneX(), localPoint.getSceneY(), object.getId());
 		if (tileObject == null)
 		{
 			return;
@@ -443,18 +448,7 @@ public class PhosaniQolPlugin extends Plugin
 			return;
 		}
 
-		final WorldPoint worldPoint = WorldPoint.fromLocalInstance(client, object.getLocalLocation());
-		final int regionId = worldPoint.getRegionID();
-		spores.add(
-			new PhosaniObject(
-				object,
-				regionId,
-				worldPoint.getRegionX(),
-				worldPoint.getRegionY(),
-				worldPoint.getPlane(),
-				config
-			)
-		);
+		spores.add(new PhosaniObject(object, config));
 	}
 
 	@Subscribe
@@ -475,7 +469,7 @@ public class PhosaniQolPlugin extends Plugin
 			return -1;
 		}
 
-		int npcId = ((NPC) actor).getId();
+		//int npcId = ((NPC) actor).getId();
 		int chargeRatio = actor.getHealthRatio();
 		int chargeScale = actor.getHealthScale();
 		int maxCharge = 200;

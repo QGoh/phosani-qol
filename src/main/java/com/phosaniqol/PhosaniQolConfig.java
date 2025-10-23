@@ -234,7 +234,7 @@ public interface PhosaniQolConfig extends Config
 		position = 8,
 		keyName = "hideHealthOverlay",
 		name = "Hide Jagex HP HUD",
-		description = "Force hides Jagex's boss health HUD since it still shows up when the in-game setting disabled",
+		description = "Force hides Jagex's boss health HUD since it shows up even when the in-game setting is disabled",
 		section = bossSettings
 	)
 	default boolean hideHealthOverlay()
@@ -326,7 +326,7 @@ public interface PhosaniQolConfig extends Config
 	@ConfigItem(
 		position = 6,
 		keyName = "addsBorderColor",
-		name = "Adds Border Color",
+		name = "Border Color",
 		description = "Sets the border color highlighting adds",
 		section = addsSettings
 	)
@@ -339,7 +339,7 @@ public interface PhosaniQolConfig extends Config
 	@ConfigItem(
 		position = 7,
 		keyName = "addsFillColor",
-		name = "Adds Fill Color",
+		name = "Fill Color",
 		description = "Sets the fill color for highlighting adds",
 		section = addsSettings
 	)

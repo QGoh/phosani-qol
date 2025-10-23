@@ -2,26 +2,18 @@ package com.phosaniqol;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.TileObject;
+import net.runelite.api.GameObject;
 
 @Getter
 @Slf4j
 public class PhosaniObject extends PhosaniNpc
 {
-	private final TileObject tileObject;
-	private final int regionId;
-	private final int regionX;
-	private final int regionY;
-	private final int z;
+	private final GameObject gameObject;
 
-	public PhosaniObject(TileObject tileObject, int regionId, int regionX, int regionY, int z, PhosaniQolConfig config)
+	public PhosaniObject(GameObject gameObject, PhosaniQolConfig config)
 	{
 		super.setNpc(null);
-		this.tileObject = tileObject;
-		this.regionId = regionId;
-		this.regionX = regionX;
-		this.regionY = regionY;
-		this.z = z;
+		this.gameObject = gameObject;
 		setHighlightConfig(config);
 	}
 
